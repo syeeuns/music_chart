@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Music chart</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css"/>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <style>
+
+
+        .jumbotron {
+            padding: 150px 32px;
+            text-align: center;
+            background: #C9D6FF; /* fallback for old browsers */
+            background: -webkit-linear-gradient(to right, #E2E2E2, #C9D6FF); /* Chrome 10-25, Safari 5.1-6 */
+            background: linear-gradient(to right, #E2E2E2, #C9D6FF); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+        }
+
+        .subtitle {
+            font-size: 15px;
+            padding-top: 10px;
+        }
+
+
+        .container{
+            width: 600px;
+            margin: 10px auto;
+        }
+
+        .card-footer{
+            text-align: center;
+            background-color: white;
+        }
+
+
+    </style>
+    <script>
+        $(function (){
+            $('.container').empty();
+            showMusics();
+        })
+
+        function openClose() {
+            let status = $('.form-container').css("display");
+            if (status === "none") {
+                $('.form-container').show();
+                $('#btn-save').text('닫기');
+            } else {
+                $('.form-container').hide();
+                $('#btn-save').text('새 음악 등록');
+            }
+        }
+
+
+        function showMusics(){
+            $.ajax({
+                type: 'GET',
+                url: `/list`,
+                data: {},
+                success: function (response) {
+                    if (response['result'] === 'success') {
+                        let chart = response['chart'];
+
+                        for(let i=0; i<chart.length; i++){
+                            let img = chart[i]['img'];
+                            let title = chart[i]['title'];
+                            let artist = chart[i]['artist'];
+                            let album = chart[i]['album'];
+                            let like = chart[i]['like'];
+
+                            let temp_html =
+                                ` <div class="card mb-3" style="max-width: 540px;">
+                                  <div class="row no-gutters">
+                                    <div class="col-md-4">
+                                      <img src="${img}" class="card-img" alt="${title}">
+                                    </div>
+                                    <div class="col-md-8">
+                                      <div class="card-body">
+                                        <h5 class="card-title">${title} (좋아요 : ${like})</h5>
+                                        <p class="card-text">${artist}</p>
+                                          <p class="card-text">${album}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <footer class="card-footer">
+                                    <a class="card-footer-item has-text-danger" onclick="likeMusic('${title}')">좋아요!<i class="fas fa-thumbs-up"></i></a>
+                                    <a class="card-footer-item has-text-info" onclick="delMusic('${title}')">삭제!<i class="fas fa-thumbs-down"></i></a>
+                                  </footer>
+                                </div>`;
+
+                            $('.container').append(temp_html);
+                        }
+                    } else {
+                        alert('서버 오류');
+                    }
+                }
+            })
+        }
+
+        function likeMusic(title){
+            $.ajax({
+                type: 'POST',
+                url: `/like`,
+                data: {'title':title},
+                success: function (response) {
+                    if (response['result'] === 'success') {
+                        alert(response['msg']);
+                        window.location.reload();
+                    } else {
+                        alert('서버 오류');
+                    }
+                }
+            })
+        }
+
+        function delMusic(title){
+            $.ajax({
+                type: 'POST',
+                url: `/del`,
+                data: {'title':title},
+                success: function (response) {
+                    if (response['result'] === 'success') {
+                        alert(response['msg']);
+                        window.location.reload();
+                    } else {
+                        alert('서버 오류');
+                    }
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+
+<div class="jumbotron">
+    <h1 class="title">Music Chart</h1>
+    <p class="subtitle">2020년 11월 4일 기준 멜론음악차트입니다.<br>순위를 매겨보아요.</p>
+</div>
+<div class="container">
+ <div class="card mb-3" style="max-width: 540px;">
+  <div class="row no-gutters">
+    <div class="col-md-4">
+      <img src="https://cdnimg.melon.co.kr/cm2/album/images/104/79/150/10479150_20200918102847_500.jpg/melon/resize/120/quality/80/optimize" class="card-img" alt="...">
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h5 class="card-title">제목</h5>
+        <p class="card-text">아티스트</p>
+          <p class="card-text">앨범</p>
+      </div>
+    </div>
+  </div>
+     <footer class="card-footer">
+    <a class="card-footer-item has-text-danger" onclick="likeMusic()">좋아요!<i class="fas fa-thumbs-up"></i></a>
+    <a class="card-footer-item has-text-info" onclick="delMusic()">삭제!<i class="fas fa-thumbs-down"></i></a>
+  </footer>
+</div>
+</div>
+
+</body>
